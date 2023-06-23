@@ -1,24 +1,43 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { BrowserRouter } from "react-router-dom";
-import { createGlobalStyle } from "styled-components";
-import App from "./components/App";
+import React, { useState } from "react";
 
-const GlobalStyle = createGlobalStyle`
-  html {
-    font-family: 'Roboto', sans-serif;
-  }
+function MovieForm() {
+  // eslint-disable-next-line no-unused-vars
+  const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState([]);
 
-  html, body {
-    margin: 0;
-    padding: 0;
-  }
-`;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetch("/movies", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((newMovie) => console.log(newMovie));
+        } else {
+          response.json().then((errorData) => setErrors(errorData.errors));
+        }
+      });
+  };
 
-ReactDOM.render(
-  <BrowserRouter>
-    <GlobalStyle />
-    <App />
-  </BrowserRouter>,
-  document.getElementById("root")
-);
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* form fields here... */}
+
+      {errors.length > 0 && (
+        <ul style={{ color: "red" }}>
+          {errors.map((error) => (
+            <li key={error}>{error}</li>
+          ))}
+        </ul>
+      )}
+
+      <button type="submit">Add Movie</button>
+    </form>
+  );
+}
+
+export default MovieForm;
